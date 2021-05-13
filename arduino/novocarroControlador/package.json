@@ -1,0 +1,25 @@
+{
+  "name": "novocarrocontrolador",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gamecontroller.js",
+  "directories": {
+    "example": "examples",
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "events": "^3.3.0",
+    "keytar": "^7.7.0",
+    "node-bluetooth": "^1.2.6",
+    "node-hid": "^1.3.2",
+    "readline-sync": "^1.4.10"
+  },
+  "devDependencies": {
+    "electron-rebuild": "^2.3.5"
+  }
+}

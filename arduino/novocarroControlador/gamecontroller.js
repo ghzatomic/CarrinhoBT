@@ -33,9 +33,9 @@ function GameController(type) {
 GameController.prototype = {
   _hid: null,
   _vendor: null,
-  connect: function(cb) {
+  connect: function (cb) {
     let ven = this._vendor;
-
+    console.log('devices:', HID.devices());
     try {
       this._hid = new HID.HID(ven.vendorId, ven.productId);
     } catch (e) {
@@ -45,9 +45,9 @@ GameController.prototype = {
 
     let hid = this._hid;
     let self = this;
-    let pass = {x: 0, y: 0};
+    let pass = { x: 0, y: 0 };
 
-    hid.on('data', function(data) {
+    hid.on('data', function (data) {
 
       let newState = ven.update(data);
       let oldState = ven.prev;
@@ -64,7 +64,7 @@ GameController.prototype = {
 
           let Ykey = sp[0] + ':' + sp[1] + ':Y';
 
-          if (sp[2] === 'X' && (ns !== os || newState[Ykey] !== oldState[Ykey])) {
+          if (sp[2] === 'X' && (ns !== os || newState[Ykey] !== oldState[Ykey])) {
             pass.x = ns;
             pass.y = newState[Ykey];
             self.emit(sp[1] + ':move', pass);
@@ -89,7 +89,7 @@ GameController.prototype = {
 
     return this;
   },
-  close: function() {
+  close: function () {
     if (this._hid) {
       this._hid.disconnect();
       this._hid = null;
@@ -98,17 +98,32 @@ GameController.prototype = {
     this.emit('close');
 
     return this;
+  },
+  showDevices: function () {
+    let dev = HID.devices();
+    let ret = [];
+
+    for (let i = 0; i < dev.length; i++) {
+
+      for (let ven in Vendors) {
+        console.log(ven + " - " + Vendors[ven].productId + " - " + Vendors[ven].vendorId)
+        if (Vendors[ven].productId === dev[i].productId && Vendors[ven].vendorId === dev[i].vendorId) {
+          ret.push(ven);
+        }
+      }
+    }
+    return ret;
   }
 };
 
-GameController.getDevices = function() {
+GameController.getDevices = function () {
   let dev = HID.devices();
   let ret = [];
 
   for (let i = 0; i < dev.length; i++) {
 
     for (let ven in Vendors) {
-
+      console.log(Vendors[ven].productId + " - " + Vendors[ven].vendorId)
       if (Vendors[ven].productId === dev[i].productId && Vendors[ven].vendorId === dev[i].vendorId) {
         ret.push(ven);
       }
