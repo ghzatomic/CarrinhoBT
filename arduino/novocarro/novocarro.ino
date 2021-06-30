@@ -16,7 +16,7 @@
 #define INTB2  A5 
 #define trig 6 // trig pin for HC-SR04
 #define echo 7 // echo pin for HC-SR04
-
+#define laserPin 4
 #define servo_pin 8 
 
 Servo servo_1; // servo controller (multiple can exist)
@@ -52,7 +52,8 @@ void setup()
     pinMode(ENA, OUTPUT);     
     pinMode(ENB, OUTPUT);     
     pinMode(INTA1, OUTPUT);     
-    pinMode(INTA2, OUTPUT);     
+    pinMode(INTA2, OUTPUT); 
+    pinMode(laserPin, OUTPUT);    
     pinMode(INTB1, OUTPUT);     
     pinMode(INTB2, OUTPUT);
 
@@ -60,7 +61,7 @@ void setup()
     servo_1.attach(servo_pin); // start servo control
     servo_1.write(servo9gRestPosition);
     delay(1000);
-    servo_1.detach();
+    //servo_1.detach();
     pinMode(trig,OUTPUT);
     pinMode(echo,INPUT);
 }
@@ -68,25 +69,47 @@ void setup()
 
 String comando = "";
 
+int modo = 0;
+
+int last_radar_pos = 0;
+
 void comandoEncontrado(String comando){
   Serial.println(comando);
   if (comando[0] == '1'){
-    setMotorA(255,1);
-    setMotorB(255,1);
+    if (modo == 0){
+      setMotorA(255,1);
+      setMotorB(255,1);
+    }
   }else if (comando[1] == '1'){
-    setMotorA(255,0);
-    setMotorB(255,0);
+    if (modo == 0){
+      setMotorA(255,0);
+      setMotorB(255,0);
+    }
   }else if (comando[2] == '1'){
-    setMotorA(255,1);
-    setMotorB(255,0);
+    if (modo == 0){
+      setMotorA(255,1);
+      setMotorB(255,0);
+    }else{
+      gira_radar(1) ;
+    }
   }else if (comando[3] == '1'){
-    setMotorA(255,0);
-    setMotorB(255,1);
+    if (modo == 0){
+      setMotorA(255,0);
+      setMotorB(255,1);
+    }else{
+      gira_radar(0);
+    }
   }else{
     stopMotors();
   }
   if (comando[4] == '1'){
-    scan();
+    modo=1;
+  }else{
+    modo=0;
+  }
+  Serial.println(modo);
+  if (comando[5] == '1'){
+    fire();
   }
   
 }
@@ -178,7 +201,12 @@ void off(int pinPWM, int pinDir1, int pinDir2){
   digitalWrite(pinDir2, LOW);
 }
 
-
+void fire(){
+  Serial.println("ATIRANDO");
+  digitalWrite(laserPin, HIGH); // Open the laser head
+  delay(1000); // Delay one second
+  digitalWrite(laserPin, LOW);
+}
 
 // ---------------------------------------------------------------------------
 
@@ -196,6 +224,21 @@ float dist_calc(int pos){
   Serial.print(pos); // position of servo motor
   Serial.print(","); // comma separate variables
   Serial.println(distance); // print distance in cm
+}
+
+void gira_radar(int lado){
+  if (lado == 0){
+    if (last_radar_pos+1 > 0 && last_radar_pos+1 < 180){
+      last_radar_pos = last_radar_pos+1 ;
+    }
+  }else{
+    if (last_radar_pos-1 > 0 && last_radar_pos-1 < 180){
+      last_radar_pos = last_radar_pos-1 ;
+    }
+  }
+  Serial.println("Girando");
+  Serial.println(last_radar_pos);
+  servo_1.write(last_radar_pos); 
 }
 
 void scan(){

@@ -23,7 +23,7 @@ const main = async () => {
   deviceScan.forEach((element, i) => {
     console.log(i + " - " + element.address + " - " + element.name)
   });
-  const escolhido = 1 //readlineSync.keyInYN('Qual device deseja conectar ?');
+  const escolhido = 0 //readlineSync.keyInYN('Qual device deseja conectar ?');
   console.log(escolhido)
   const deviceEscolhido = deviceScan[escolhido]
   device.findSerialPortChannel(deviceEscolhido.address, async function (channel) {
@@ -41,6 +41,7 @@ const main = async () => {
       });
 
       data = [0, 0, 0, 0, 0, 0]
+      modo_sonar = false
       record = []
       modoGravacao = false
       ctrl.on('Up:press', function () {
@@ -84,13 +85,28 @@ const main = async () => {
       });
 
       ctrl.on('B:press', function () {
-        data[4] = 1
+        if (modo_sonar){
+          data[4] = 0
+          modo_sonar = false
+        }else{
+          data[4] = 1
+          modo_sonar = true
+        }
         connection.write(new Buffer(data.join(['']) + "|"), () => { });
-        data[4] = 0
       });
 
-      ctrl.on('B:release', function () {
+      // ctrl.on('B:release', function () {
+      //   data[4] = 0
+      //   connection.write(new Buffer(data.join(['']) + "|"), () => { });
+      // });
+      ctrl.on('A:press', function () {
+        data[5] = 1
+        connection.write(new Buffer(data.join(['']) + "|"), () => { });
+      });
 
+      ctrl.on('A:release', function () {
+        data[5] = 0
+        connection.write(new Buffer(data.join(['']) + "|"), () => { });
       });
 
     });
