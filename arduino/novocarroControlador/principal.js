@@ -33,15 +33,16 @@ const main = async () => {
       if (err) return console.error(err);
 
       connection.delimiter = 13;
-      // connection.on('data', (buffer) =0,0,0,0,0,0> {
-      //   console.log('received message:', buffer.toString());
-      // });
+      connection.on('data', (buffer) => {
+        console.log('received message:', buffer.toString());
+      });
       ctrl.connect(function () {
         console.log('Game On!');
       });
 
       data = [0, 0, 0, 0, 0, 0]
       modo_sonar = false
+      modo_laser = false
       record = []
       modoGravacao = false
       ctrl.on('Up:press', function () {
@@ -85,20 +86,14 @@ const main = async () => {
       });
 
       ctrl.on('B:press', function () {
-        if (modo_sonar){
-          data[4] = 0
-          modo_sonar = false
-        }else{
-          data[4] = 1
-          modo_sonar = true
-        }
+        data[4] = 1
         connection.write(new Buffer(data.join(['']) + "|"), () => { });
       });
 
-      // ctrl.on('B:release', function () {
-      //   data[4] = 0
-      //   connection.write(new Buffer(data.join(['']) + "|"), () => { });
-      // });
+      ctrl.on('B:release', function () {
+        data[4] = 0
+        connection.write(new Buffer(data.join(['']) + "|"), () => { });
+      });
       ctrl.on('A:press', function () {
         data[5] = 1
         connection.write(new Buffer(data.join(['']) + "|"), () => { });
